@@ -4,34 +4,44 @@
 #include <stdlib.h>
 
 
+const int WIDTH = 800;
+const int HEIGHT = 600;
+
+float TRIANGLE_VERTICES[] = {
+    -0.5f, -0.5f, 0.0f,
+     0.5f, -0.5f, 0.0f,
+     0.0f,  0.5f, 0.0f
+};
+
+
 // called when user resizes window
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
 // called when we receive input
-void processInput(GLFWwindow *window)
-{
+void processInput(GLFWwindow *window) {
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, 1);
 }
 
-unsigned int compile_triangle_vao() {
-    // Lets create a VAO, why not ... (Vertex Array Object)
+unsigned int new_VAO() {
     unsigned int VAO;
     glGenVertexArrays(1, &VAO);
 
-    // triangle vertices
-    float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
-    };
+    return VAO;
+}
 
-    // lets create a vertex buffer object (VBO)
+unsigned int new_VBO() {
     unsigned int VBO;
     glGenBuffers(1, &VBO);
+
+    return VBO;
+}
+
+void send_vertices_to_buffer(unsigned int VAO, float vertices[], float size) {
+    // lets create a vertex buffer object (VBO)
+    unsigned int VBO = new_VBO(); 
 
     // bind the VAO
     glBindVertexArray(VAO);
@@ -42,7 +52,7 @@ unsigned int compile_triangle_vao() {
 
     // lets make some memory for our vertices and copy that data to the
     // buffer's memory.
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), vertices, GL_STATIC_DRAW);
     // GL_STATIC_DRAW: the data will most likely not change at all or very rarely.
     // GL_DYNAMIC_DRAW: the data is likely to change a lot.
     // GL_STREAM_DRAW: the data will change every time it is drawn.
@@ -53,8 +63,6 @@ unsigned int compile_triangle_vao() {
     // first argument is `0` because location=0 in our vertexShader
     // second argument is `3` because the vertex attribute is vec3, 3 values.
     glEnableVertexAttribArray(0); // `0` as argument because location=0
-
-    return VAO;
 }
 
 unsigned int compile_triangle_shaderprogram() {
@@ -83,8 +91,7 @@ unsigned int compile_triangle_shaderprogram() {
     char infoLog[512]; // storage container for error messages
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 
-    if(!success)
-    {
+    if(!success) {
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
         printf("Could not compile vertex shader");
         printf(infoLog);
@@ -162,12 +169,13 @@ int main(int argc, char* argv[]) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // only on MACOS
-
+    #ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // only on MACOS
+    #endif
+    
     // creating the window
-    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL App", NULL, NULL);
-    if (window == NULL)
-    {
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL App", NULL, NULL);
+    if (window == NULL) {
         printf("Failed to create GLFW window");
         glfwTerminate();
         return -1;
@@ -177,20 +185,21 @@ int main(int argc, char* argv[]) {
     // hook on window resize
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         printf("Failed to initialize GLAD");
         return -1;
     }
+    
+    printf("OpenGL %d.%d\n", GLVersion.major, GLVersion.minor);
 
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, WIDTH, HEIGHT);
 
-    unsigned int VAO = compile_triangle_vao();
+    unsigned int VAO = new_VAO();
+    send_vertices_to_buffer(VAO, TRIANGLE_VERTICES, 9);
     unsigned int shaderProgram = compile_triangle_shaderprogram();
 
     // render loop
-    while(!glfwWindowShouldClose(window))
-    {
+    while(!glfwWindowShouldClose(window)) {
         processInput(window);
 
         // render here
