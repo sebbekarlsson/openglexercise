@@ -11,3 +11,6 @@
 > Some notes:
 * *GLAD* I am using *GLAD* to link OpenGL
 * *GLFW3* I am using *GLFW* to create windows with OpenGL context
+
+## Next up
+> Next up is `EBO` (Element Buffer Objects)
