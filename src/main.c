@@ -13,6 +13,18 @@ float TRIANGLE_VERTICES[] = {
      0.0f,  0.5f, 0.0f
 };
 
+float RECTANGLE_VERTICES[] = {
+     0.5f,  0.5f, 0.0f,  // top right
+     0.5f, -0.5f, 0.0f,  // bottom right
+    -0.5f, -0.5f, 0.0f,  // bottom left
+    -0.5f,  0.5f, 0.0f   // top left 
+};
+
+unsigned int RECTANGLE_INDICES[] = {  // note that we start from 0!
+    0, 1, 3,   // first triangle
+    1, 2, 3    // second triangle
+}; 
+
 
 // called when user resizes window
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -39,7 +51,14 @@ unsigned int new_VBO() {
     return VBO;
 }
 
-void send_vertices_to_buffer(unsigned int VAO, float vertices[], float size) {
+unsigned int new_EBO() {
+    unsigned int EBO;
+    glGenBuffers(1, &EBO);
+
+    return EBO;
+}
+
+void send_vertices_to_buffer(unsigned int VAO, float vertices[], float size, int mode) {
     // lets create a vertex buffer object (VBO)
     unsigned int VBO = new_VBO(); 
 
@@ -48,11 +67,11 @@ void send_vertices_to_buffer(unsigned int VAO, float vertices[], float size) {
 
     // the buffer type of a vertex buffer object is GL_ARRAY_BUFFER
     // so lets use that one for this VBO.
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(mode, VBO);
 
     // lets make some memory for our vertices and copy that data to the
     // buffer's memory.
-    glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), vertices, GL_STATIC_DRAW);
+    glBufferData(mode, size * sizeof(float), vertices, GL_STATIC_DRAW);
     // GL_STATIC_DRAW: the data will most likely not change at all or very rarely.
     // GL_DYNAMIC_DRAW: the data is likely to change a lot.
     // GL_STREAM_DRAW: the data will change every time it is drawn.
@@ -155,13 +174,21 @@ unsigned int compile_triangle_shaderprogram() {
     return shaderProgram;
 }
 
-void render_triangle(unsigned int VAO, unsigned int shaderProgram) {
+void render_VAO(unsigned int VAO, unsigned int shaderProgram, int mode) {
     // lets activate the program object, telling the graphics card to use it.
     glUseProgram(shaderProgram);
 
     // Bind VAO again
     glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    // render using wireframe mode
+    // use GL_FILL to reset to normal
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    if (mode == 0)
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+    else
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
 int main(int argc, char* argv[]) {
@@ -195,7 +222,12 @@ int main(int argc, char* argv[]) {
     glViewport(0, 0, WIDTH, HEIGHT);
 
     unsigned int VAO = new_VAO();
-    send_vertices_to_buffer(VAO, TRIANGLE_VERTICES, 9);
+    // rectangle
+    send_vertices_to_buffer(VAO, RECTANGLE_VERTICES, sizeof(RECTANGLE_VERTICES), GL_ARRAY_BUFFER);
+    send_vertices_to_buffer(VAO, RECTANGLE_INDICES, sizeof(RECTANGLE_INDICES), GL_ELEMENT_ARRAY_BUFFER);
+
+    // triangle
+    // send_vertices_to_buffer(VAO, TRIANGLE_VERTICES, sizeof(TRIANGLE_VERTICES), GL_ARRAY_BUFFER);
     unsigned int shaderProgram = compile_triangle_shaderprogram();
 
     // render loop
@@ -206,7 +238,11 @@ int main(int argc, char* argv[]) {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        render_triangle(VAO, shaderProgram);
+        // rectangle
+        render_VAO(VAO, shaderProgram, 1);
+
+        // triangle
+        //render_VAO(VAO, shaderProgram, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();    

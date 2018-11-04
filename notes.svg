@@ -25,16 +25,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="183.57143"
-     inkscape:cy="834.63496"
+     inkscape:zoom="0.7"
+     inkscape:cx="327.94013"
+     inkscape:cy="775.86799"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1080"
-     inkscape:window-x="1920"
-     inkscape:window-y="0"
+     inkscape:window-width="928"
+     inkscape:window-height="1011"
+     inkscape:window-x="2886"
+     inkscape:window-y="43"
      inkscape:window-maximized="0" />
   <metadata
      id="metadata3683">
@@ -143,5 +143,51 @@
          y="88.073906"
          style="font-size:4.93888903px;line-height:0.5;stroke-width:0.26458332"
          id="tspan4677">Switching state is as easy as binding a different VAO.</tspan></text>
+    <ellipse
+       id="path3696-9-3"
+       cx="19.654762"
+       cy="103.47619"
+       rx="8.5044641"
+       ry="8.7879467"
+       style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.26458332;stroke-opacity:1" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:6.23729753px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.15593244"
+       x="12.047428"
+       y="112.86542"
+       id="text4517-1-6"
+       transform="scale(1.0687962,0.93563207)"><tspan
+         sodipodi:role="line"
+         id="tspan4515-2-7"
+         x="12.047428"
+         y="112.86542"
+         style="stroke-width:0.15593244">EBO</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="37.041668"
+       y="154.125"
+       id="text4529"><tspan
+         sodipodi:role="line"
+         id="tspan4527"
+         x="37.041668"
+         y="163.48877"
+         style="stroke-width:0.26458332"></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:0.5;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
+       x="5.4045653"
+       y="120.28063"
+       id="text4542-53"><tspan
+         sodipodi:role="line"
+         x="5.4045653"
+         y="120.28063"
+         style="font-size:4.93888903px;line-height:0.5;stroke-width:0.26458332"
+         id="tspan4588-2">This is a buffer, much like the VBO. it stores indices that OpenGL</tspan><tspan
+         sodipodi:role="line"
+         x="5.4045653"
+         y="125.62742"
+         style="font-size:4.93888903px;line-height:0.5;stroke-width:0.26458332"
+         id="tspan4564">uses to decide what vertices to draw. This is called Indexed Drawing.</tspan></text>
   </g>
 </svg>
