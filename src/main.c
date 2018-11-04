@@ -7,12 +7,6 @@
 const int WIDTH = 800;
 const int HEIGHT = 600;
 
-float TRIANGLE_VERTICES[] = {
-    -0.5f, -0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-     0.0f,  0.5f, 0.0f
-};
-
 float RECTANGLE_VERTICES[] = {
      0.5f,  0.5f, 0.0f,  // top right
      0.5f, -0.5f, 0.0f,  // bottom right
@@ -24,7 +18,6 @@ unsigned int RECTANGLE_INDICES[] = {  // note that we start from 0!
     0, 1, 3,   // first triangle
     1, 2, 3    // second triangle
 }; 
-
 
 // called when user resizes window
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -58,33 +51,16 @@ unsigned int new_EBO() {
     return EBO;
 }
 
-void send_vertices_to_buffer(unsigned int VAO, float vertices[], float size, int mode) {
-    // lets create a vertex buffer object (VBO)
-    unsigned int VBO = new_VBO(); 
-
-    // bind the VAO
-    glBindVertexArray(VAO);
-
-    // the buffer type of a vertex buffer object is GL_ARRAY_BUFFER
-    // so lets use that one for this VBO.
-    glBindBuffer(mode, VBO);
-
+void send_vertices_to_buffer(float vertices[], float size, int mode) {
     // lets make some memory for our vertices and copy that data to the
     // buffer's memory.
     glBufferData(mode, size * sizeof(float), vertices, GL_STATIC_DRAW);
     // GL_STATIC_DRAW: the data will most likely not change at all or very rarely.
     // GL_DYNAMIC_DRAW: the data is likely to change a lot.
     // GL_STREAM_DRAW: the data will change every time it is drawn.
-
-    // we have to tell OpenGL how to interpret the vertex data and how
-    // to connect it to the shaders
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    // first argument is `0` because location=0 in our vertexShader
-    // second argument is `3` because the vertex attribute is vec3, 3 values.
-    glEnableVertexAttribArray(0); // `0` as argument because location=0
 }
 
-unsigned int compile_triangle_shaderprogram() {
+unsigned int compile_shaders() {
     const char* vertexShaderSource =
         "#version 330 core\n" // using 330 because we are using OpenGL 3.3
         "layout (location = 0) in vec3 aPos;\n"
@@ -174,7 +150,7 @@ unsigned int compile_triangle_shaderprogram() {
     return shaderProgram;
 }
 
-void render_VAO(unsigned int VAO, unsigned int shaderProgram, int mode) {
+void render_VAO(unsigned int VAO, unsigned int shaderProgram, int vertices, int mode) {
     // lets activate the program object, telling the graphics card to use it.
     glUseProgram(shaderProgram);
 
@@ -186,9 +162,11 @@ void render_VAO(unsigned int VAO, unsigned int shaderProgram, int mode) {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     if (mode == 0)
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, vertices);
     else
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, vertices, GL_UNSIGNED_INT, 0);
+
+    glBindVertexArray(0);
 }
 
 int main(int argc, char* argv[]) {
@@ -222,13 +200,29 @@ int main(int argc, char* argv[]) {
     glViewport(0, 0, WIDTH, HEIGHT);
 
     unsigned int VAO = new_VAO();
-    // rectangle
-    send_vertices_to_buffer(VAO, RECTANGLE_VERTICES, sizeof(RECTANGLE_VERTICES), GL_ARRAY_BUFFER);
-    send_vertices_to_buffer(VAO, RECTANGLE_INDICES, sizeof(RECTANGLE_INDICES), GL_ELEMENT_ARRAY_BUFFER);
+    unsigned int VBO = new_VBO(); 
+    unsigned int EBO = new_EBO();
 
-    // triangle
-    // send_vertices_to_buffer(VAO, TRIANGLE_VERTICES, sizeof(TRIANGLE_VERTICES), GL_ARRAY_BUFFER);
-    unsigned int shaderProgram = compile_triangle_shaderprogram();
+    glBindVertexArray(VAO);
+
+    // the buffer type of a vertex buffer object is GL_ARRAY_BUFFER
+    // so lets use that one for this VBO.
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    // rectangle
+    send_vertices_to_buffer(RECTANGLE_VERTICES, sizeof(RECTANGLE_VERTICES), GL_ARRAY_BUFFER);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    send_vertices_to_buffer(RECTANGLE_INDICES, sizeof(RECTANGLE_INDICES), GL_ELEMENT_ARRAY_BUFFER);
+
+    // we have to tell OpenGL how to interpret the vertex data and how
+    // to connect it to the shaders
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // first argument is `0` because location=0 in our vertexShader
+    // second argument is `3` because the vertex attribute is vec3, 3 values.
+    glEnableVertexAttribArray(0); // `0` as argument because location=0
+
+    unsigned int shaderProgram = compile_shaders();
 
     // render loop
     while(!glfwWindowShouldClose(window)) {
@@ -239,10 +233,7 @@ int main(int argc, char* argv[]) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         // rectangle
-        render_VAO(VAO, shaderProgram, 1);
-
-        // triangle
-        //render_VAO(VAO, shaderProgram, 0);
+        render_VAO(VAO, shaderProgram, sizeof(RECTANGLE_INDICES) / sizeof(unsigned int), 1);
 
         glfwSwapBuffers(window);
         glfwPollEvents();    
